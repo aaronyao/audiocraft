@@ -535,7 +535,7 @@ class ChromaStemConditioner(WaveformConditioner):
                  device: tp.Union[torch.device, str] = 'cpu', **kwargs):
         from demucs import pretrained
         super().__init__(dim=n_chroma, output_dim=output_dim, device=device)
-        self.autocast = TorchAutocast(enabled=device != 'cpu', device_type=self.device, dtype=torch.float32)
+        self.autocast = TorchAutocast(enabled=device == 'cuda', device_type=self.device, dtype=torch.float32)
         self.sample_rate = sample_rate
         self.match_len_on_eval = match_len_on_eval
         if match_len_on_eval:
