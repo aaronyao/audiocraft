@@ -126,6 +126,15 @@ class MusicGen(BaseGenModel):
                              melody_sample_rate: int, progress: bool = False,
                              return_tokens: bool = False) -> tp.Union[torch.Tensor,
                                                                       tp.Tuple[torch.Tensor, torch.Tensor]]:
+        return self.generate_continuation_with_chroma(
+                    descriptions, None, 0, melody_wavs, melody_sample_rate, progress, return_tokens
+                    )
+    
+    def generate_continuation_with_chroma(self, descriptions: tp.List[str], 
+                                         prompt_wav: torch.Tensor,
+                                         prompt_sample_rate: int,
+                                         melody_wavs: MelodyType, melody_sample_rate: int, 
+                                         progress: bool = False,return_tokens: bool = False) -> tp.Union[torch.Tensor,tp.Tuple[torch.Tensor, torch.Tensor]]:
         """Generate samples conditioned on text and melody.
 
         Args:
@@ -152,9 +161,15 @@ class MusicGen(BaseGenModel):
             convert_audio(wav, melody_sample_rate, self.sample_rate, self.audio_channels)
             if wav is not None else None
             for wav in melody_wavs]
-        attributes, prompt_tokens = self._prepare_tokens_and_attributes(descriptions=descriptions, prompt=None,
+        
+        if prompt_wav is not None:
+            if prompt_wav.dim() == 2:
+                prompt_wav = prompt_wav[None]
+            prompt_wav = convert_audio(prompt_wav, prompt_sample_rate, self.sample_rate, self.audio_channels)
+
+        attributes, prompt_tokens = self._prepare_tokens_and_attributes(descriptions=descriptions, prompt=prompt_wav,
                                                                         melody_wavs=melody_wavs)
-        assert prompt_tokens is None
+        # assert prompt_tokens is None
         tokens = self._generate_tokens(attributes, prompt_tokens, progress)
         if return_tokens:
             return self.generate_audio(tokens), tokens
