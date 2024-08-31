@@ -1,7 +1,7 @@
+import os
 import torchaudio
 from audiocraft.models import MusicGen
 from audiocraft.data.audio import audio_write
-from tempfile import NamedTemporaryFile
 
 def test_generate():
     descriptions = ['disco progressive funk with groovy rhythm and spontaneous ad-libs']
@@ -39,7 +39,7 @@ def test_generate_with_chroma():
         resampler = torchaudio.transforms.Resample(orig_freq=sr, new_freq=SAMPLE_RATE)
         melody_wav = resampler(melody_wav)
 
-    descriptions = ['piano solo', 'drums solo', 'bass solo']
+    descriptions = ['piano', 'drums', 'bass']
     MODEL.set_generation_params(duration=30) 
     generated_outputs = MODEL.generate_with_chroma(descriptions=descriptions,
                                             melody_wavs=[melody_wav]*len(descriptions),
@@ -73,15 +73,18 @@ def test_generate_continuation_with_chroma():
                             melody_wavs=melodies, melody_sample_rate=SAMPLE_RATE, progress=True,return_tokens=False)
     save_outputs(generated_outputs)
 
-def save_outputs(generated_outputs):
-    for output in generated_outputs:
-        with NamedTemporaryFile("wb", suffix=".wav", delete=False) as file:
-            audio_write(
-                file.name, output, SAMPLE_RATE, strategy="loudness",
-                loudness_headroom_db=16, loudness_compressor=True, add_suffix=False)
-
-            print(f'wav: {file.name}')
-
+def save_outputs(generated_outputs, output_dir="outputs", sample_rate=32000):
+    # 确保输出目录存在
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # 遍历每个生成的输出并保存为 WAV 文件
+    for i, output in enumerate(generated_outputs):
+        output_path = os.path.join(output_dir, f"output_{i + 1}.wav")
+        audio_write(
+            output_path, output, sample_rate, strategy="loudness",
+            loudness_headroom_db=16, loudness_compressor=True, add_suffix=False)
+        
+        print(f'wav saved: {output_path}')
 
 import torchaudio
 import librosa
@@ -102,7 +105,6 @@ def plot_chroma():
     plt.show()
 
 if __name__ == '__main__':
-
     SAMPLE_RATE = 32000
     # MODEL = MusicGen.get_pretrained('facebook/musicgen-small')
     # MODEL = MusicGen.get_pretrained('facebook/musicgen-large')
