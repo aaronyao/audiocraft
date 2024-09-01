@@ -39,7 +39,7 @@ def test_generate_with_chroma():
         resampler = torchaudio.transforms.Resample(orig_freq=sr, new_freq=SAMPLE_RATE)
         melody_wav = resampler(melody_wav)
 
-    descriptions = ['piano', 'drums', 'bass']
+    descriptions = ['An energetic hip-hop music piece, with synth sounds and strong bass. There is a rhythmic hi-hat patten in the drums.']
     MODEL.set_generation_params(duration=30) 
     generated_outputs = MODEL.generate_with_chroma(descriptions=descriptions,
                                             melody_wavs=[melody_wav]*len(descriptions),
