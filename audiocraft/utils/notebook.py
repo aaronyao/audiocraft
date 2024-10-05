@@ -14,13 +14,17 @@ except ImportError:
 import torch
 
 
-def display_audio(samples: torch.Tensor, sample_rate: int):
-    """Renders an audio player for the given audio samples.
+import IPython.display as ipd
+
+def display_audio(samples: torch.Tensor, sample_rate: int, descriptions: list = None):
+    """Renders an audio player for the given audio samples, with descriptions above each player.
 
     Args:
         samples (torch.Tensor): a Tensor of decoded audio samples
             with shapes [B, C, T] or [C, T]
         sample_rate (int): sample rate audio should be displayed with.
+        descriptions (list): a list of descriptions (titles) for each audio player.
+            Length of descriptions should match the number of audio samples.
     """
     assert samples.dim() == 2 or samples.dim() == 3
 
@@ -28,5 +32,10 @@ def display_audio(samples: torch.Tensor, sample_rate: int):
     if samples.dim() == 2:
         samples = samples[None, ...]
 
-    for audio in samples:
+    if descriptions is not None:
+        assert len(descriptions) == samples.size(0), "Descriptions length must match number of audio samples."
+
+    for i, audio in enumerate(samples):
+        if descriptions is not None:
+            print(f"Title: {descriptions[i]}")
         ipd.display(ipd.Audio(audio, rate=sample_rate))
