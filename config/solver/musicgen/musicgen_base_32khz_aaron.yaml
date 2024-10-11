@@ -6,14 +6,14 @@
 defaults:
   - musicgen/default
   - /model: lm/musicgen_lm
-  # - override /dset: audio/default
-  # - override /model/lm/model_scale: xsmall
+  - override /model/lm/model_scale: small  
+  - override /conditioner: text2music
   - override /dset: audio/example
   - _self_
 
 device: mps
 autocast: false
-autocast_dtype: 
+autocast_dtype: float16
 
 # EnCodec large trained on mono-channel music audio sampled at 32khz
 # with a total stride of 640 leading to 50 frames/s.
